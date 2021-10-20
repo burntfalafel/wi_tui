@@ -40,11 +40,15 @@ static int wpa_ctrl_command(struct wpa_ctrl *ctrl, char *cmd)
 {
         return _wpa_ctrl_command(ctrl, cmd, 1);
 }
+
+static int wpa_cli_cmd_scan(struct wpa_ctrl *ctrl)
+{
+         return wpa_ctrl_command(ctrl, "SCAN");
+}
 static int wpa_cli_cmd_scan_results(struct wpa_ctrl *ctrl)
 {
-return wpa_ctrl_command(ctrl, "SCAN_RESULTS");
+  return wpa_ctrl_command(ctrl, "SCAN_RESULTS");
 }
-
 static struct wpa_ctrl *ctrl_conn;
 static int hostapd_cli_quit = 0;
 static int hostapd_cli_attached = 0;
@@ -58,6 +62,7 @@ int main(int argc, char *argv[])
         printf("Could not get ctrl interface!\n");
         return -1;
     }
+  printf("%d\n", wpa_cli_cmd_scan(ctrl_conn));
   printf("%d\n", wpa_cli_cmd_scan_results(ctrl_conn));
   return 0;
 }
