@@ -1,0 +1,19 @@
+[
+    {
+        "arguments": [
+            "clang",
+            "-c",
+            "-Iinclude/str",
+            "lib/libwpa_client.a",
+            "-D",
+            "CONFIG_CTRL_IFACE",
+            "-D",
+            "CONFIG_CTRL_IFACE_UNIX",
+            "-o",
+            "witui",
+            "src/wpa_interface.c"
+        ],
+        "directory": "/home/void/workspace/witui",
+        "file": "src/wpa_interface.c"
+    }
+]
