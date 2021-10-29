@@ -1,3 +1,0 @@
-[submodule "include/str"]
-	path = include/str
-	url = https://github.com/maxim2266/str.git

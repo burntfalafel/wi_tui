@@ -27,7 +27,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "str.h"
 
 #ifndef _WIN32_WCE
 #ifndef CONFIG_TI_COMPILER
