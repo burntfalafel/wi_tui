@@ -3,7 +3,7 @@
         "arguments": [
             "clang",
             "-c",
-            "-Iinclude/str",
+            "-Isrc/",
             "lib/libwpa_client.a",
             "-D",
             "CONFIG_CTRL_IFACE",

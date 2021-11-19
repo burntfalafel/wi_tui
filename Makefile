@@ -1,17 +1,16 @@
 CC=clang
 LIB = lib/libwpa_client.a
-CFLAGS=-lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
+CFLAGS= -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
 CCFLAGS=-Wall
 DEPS = include/includes.h include/wpa_ctrl.h include/common.h
-INCLUDEDIR = include/str/
+INCLUDEDIR = src/
 SRC = src/wpa_interface.c
-INCLUDESRC = $(INCLUDEDIR)/str.c
 TARGET = witui
 
 all: $(TARGET)
 
 $(TARGET): $(SRC) 
-	$(CC) $(CCFLAGS) -I$(INCLUDEDIR) $(SRC) $(INCLUDESRC) $(LIB) -o $@ $(CFLAGS)
+	$(CC) $(CCFLAGS) -I$(INCLUDEDIR) $(SRC) $(LIB) -o $@ $(CFLAGS)
 
 .PHONY: clean
 

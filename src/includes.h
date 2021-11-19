@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <curses.h>
+#include <menu.h>
+
 
 
 #ifndef _WIN32_WCE
