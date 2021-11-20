@@ -1,6 +1,6 @@
 CC=clang
 LIB = lib/libwpa_client.a
-CFLAGS= -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
+CFLAGS= -lform -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
 CCFLAGS=-Wall
 DEPS = include/includes.h include/wpa_ctrl.h include/common.h
 INCLUDEDIR = src/

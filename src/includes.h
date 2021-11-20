@@ -28,7 +28,7 @@
 #include <string.h>
 #include <curses.h>
 #include <menu.h>
-
+#include <form.h>
 
 
 #ifndef _WIN32_WCE
