@@ -3,6 +3,8 @@
 #include "wpa_ctrl.h"
 #include "common.h"
 #include "wpa_interface.h"
+#include <curses.h>
+#include <form.h>
 #include <menu.h>
 //#include "common/version.h"
 //
@@ -103,6 +105,14 @@ char selected_ssid[100];
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 
+static void
+trim(char *buffer)
+{
+    size_t n = strlen(buffer);
+    while (n-- && isspace(buffer[n]))
+	buffer[n] = 0;
+}
+
 int main(int argc, char *argv[])
 {
   /* setup & scan wpa signals */
@@ -164,7 +174,7 @@ int main(int argc, char *argv[])
 	MENU *my_menu = new_menu((ITEM **)ssid_items);
 
   /* Create the window to be associated with the menu */
-  WINDOW *my_menu_win = newwin(100, 100, starty-20, startx-20);
+  WINDOW *my_menu_win = newwin(100, 100, starty-20, startx);
 
   /* Set main window and sub window */
   set_menu_win(my_menu, my_menu_win);
@@ -198,6 +208,7 @@ int main(int argc, char *argv[])
 				      p = item_userptr(cur);
 				      p((char *)item_name(cur));
 				      pos_menu_cursor(my_menu);
+              clear();
 				      break;
 			      }
 
@@ -213,11 +224,14 @@ int main(int argc, char *argv[])
 	endwin();
 
 
-	wrefresh(my_menu_win);
+  wrefresh(my_menu_win);
   /* Initialize the fields */
   FIELD *field[3];
-	field[0] = new_field(1, 10, 6, 1, 0, 0);
-	field[1] = new_field(1, 10, 8, 1, 0, 0);
+  /* Initialize the fields */
+  field[0] = new_field(1, 26, 1 , 10, 0, 0);
+  field_opts_off(field[0], O_BLANK);
+  field[1] = new_field(1, 26, 4, 10, 0, 0);
+  field_opts_off(field[1], O_BLANK);
 	field[2] = NULL;
 
 	/* Set field options */
@@ -235,7 +249,7 @@ int main(int argc, char *argv[])
 	scale_form(my_form, &rows, &cols);
 
 	/* Create the window to be associated with the form */
-        WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx+20);
+        WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
         keypad(my_form_win, TRUE);
 
 	/* Set main window and sub window */
@@ -249,11 +263,15 @@ int main(int argc, char *argv[])
 	post_form(my_form);
 	wrefresh(my_form_win);
 
+	mvprintw(starty-17, startx-10, "KEY?:");
+	mvprintw(starty-14, startx-10, "PSK:");
 	mvprintw(LINES - 2, 0, "Use UP, DOWN arrow keys to switch between fields");
 	refresh();
 
+  /* Clear fields */
 	/* Loop through to get user requests */
-	while((ch = wgetch(my_form_win)) != KEY_F(1))
+  int exit_form_flag=0;
+	while((ch = wgetch(my_form_win)) != KEY_F(1) || exit_form_flag == 1)
 	{	switch(ch)
 		{	case KEY_DOWN:
 				/* Go to next field */
@@ -267,12 +285,31 @@ int main(int argc, char *argv[])
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_END_LINE);
 				break;
+      case KEY_BACKSPACE:
+      case 127:
+      case '\b':
+        form_driver(my_form, REQ_DEL_PREV);
+        break;
+      case 10:
+        for (int n = 0; field[n] != 0; n++) {
+		char *s = field_buffer(field[n], 0);
+		if (s != 0
+		    && (s = strdup(s)) != 0) {
+		    trim(s);
+	      mvprintw(LINES - 12, 0, s);
+		    free(s);
+    }}
+        exit_form_flag = 1;
+        break;
 			default:
 				/* If this is a normal character, it gets */
 				/* Printed				  */	
 				form_driver(my_form, ch);
 				break;
 		}
+	refresh();
+  wrefresh(my_form_win);
+
 	}
 
 	/* Un post form and free the memory */
