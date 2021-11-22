@@ -2,7 +2,7 @@
 
 #include "wpa_ctrl.h"
 #include "common.h"
-#include "wpa_interface.h"
+#include "witui.h"
 #include <curses.h>
 #include <form.h>
 #include <menu.h>
@@ -249,15 +249,15 @@ int main(int argc, char *argv[])
 	scale_form(my_form, &rows, &cols);
 
 	/* Create the window to be associated with the form */
-        WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
-        keypad(my_form_win, TRUE);
+  WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
+  keypad(my_form_win, TRUE);
 
 	/* Set main window and sub window */
-        set_form_win(my_form, my_form_win);
-        set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+  set_form_win(my_form, my_form_win);
+  set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
 	/* Print a border around the main window and print a title */
-        box(my_form_win, 0, 0);
+  box(my_form_win, 0, 0);
 	//print_in_middle(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
 	
 	post_form(my_form);
@@ -291,14 +291,20 @@ int main(int argc, char *argv[])
         form_driver(my_form, REQ_DEL_PREV);
         break;
       case 10:
-        for (int n = 0; field[n] != 0; n++) {
-		char *s = field_buffer(field[n], 0);
-		if (s != 0
-		    && (s = strdup(s)) != 0) {
-		    trim(s);
-	      mvprintw(LINES - 12, 0, s);
-		    free(s);
-    }}
+        {
+        char *key_needed = field_buffer(field[0], 0);
+        if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
+        {
+          trim(key_needed);
+          if (strcmp(key_needed, "y") || strcmp(key_needed, "Y"))
+            break;
+          else if (strcmp(key_needed, "n") || strcmp(key_needed, "N"))
+            break;
+          else
+            break;
+          free(key_needed);
+        }
+        }
         exit_form_flag = 1;
         break;
 			default:

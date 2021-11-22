@@ -4,7 +4,7 @@ CFLAGS= -lform -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IF
 CCFLAGS=-Wall
 DEPS = include/includes.h include/wpa_ctrl.h include/common.h
 INCLUDEDIR = src/
-SRC = src/wpa_interface.c
+SRC = src/witui.c
 TARGET = witui
 
 all: $(TARGET)
