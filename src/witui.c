@@ -56,6 +56,42 @@ static int wpa_cli_cmd_scan_results(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "SCAN_RESULTS", message);
 }
+static int wpa_cli_cmd_add_network(struct wpa_ctrl *ctrl, char *message)
+{
+  return wpa_ctrl_command(ctrl, "ADD_NETWORK", message);
+}
+static int wpa_cli_cmd_set_ssid(struct wpa_ctrl *ctrl, char *message, char *network_id, char *ssid)
+{
+  char cmd[100];
+  sprintf(cmd, "SET_NETWORK %s ssid \"%s\"", network_id, ssid);
+
+  return wpa_ctrl_command(ctrl, cmd, message);
+}
+static int wpa_cli_cmd_set_psk(struct wpa_ctrl *ctrl, char *message, char *network_id, char *psk)
+{
+    char cmd[100];
+  sprintf(cmd, "SET_NETWORK %s psk \"%s\"", network_id, psk);
+
+  return wpa_ctrl_command(ctrl, cmd, message);
+}
+static int wpa_cli_cmd_no_psk(struct wpa_ctrl *ctrl, char *message, char *network_id)
+{
+  char cmd[100];
+  sprintf(cmd, "SET_NETWORK %s key_mgmt NONE", network_id);
+  
+  return wpa_ctrl_command(ctrl, cmd, message);
+}
+static int wpa_cli_cmd_enable_network(struct wpa_ctrl *ctrl, char *message, char *network_id)
+{
+  char cmd[100];
+  sprintf(cmd, "ENABLE_NETWORK %s", network_id);
+  
+  return wpa_ctrl_command(ctrl, cmd, message);
+}
+static int wpa_cli_cmd_save_config(struct wpa_ctrl *ctrl, char *message)
+{
+  return wpa_ctrl_command(ctrl, "SAVE_CONFIG", message);
+}
 static int ssid_str(char* string, ssid *wlist )
 {
 int tabct=0;
@@ -226,20 +262,25 @@ int main(int argc, char *argv[])
 
   wrefresh(my_menu_win);
   /* Initialize the fields */
-  FIELD *field[3];
+  FIELD *field[5];
   /* Initialize the fields */
   field[0] = new_field(1, 26, 1 , 10, 0, 0);
-  field_opts_off(field[0], O_BLANK);
   field[1] = new_field(1, 26, 4, 10, 0, 0);
-  field_opts_off(field[1], O_BLANK);
-	field[2] = NULL;
+  field[2] = new_field(1, 5, starty-23, 3, 0, 0);
+  field[3] = new_field(1, 5, starty-20, 3, 0, 0);
+	field[4] = NULL;
 
 	/* Set field options */
+  field_opts_off(field[0], O_AUTOSKIP);
 	set_field_back(field[0], A_UNDERLINE);
-	field_opts_off(field[0], O_AUTOSKIP); /* Don't go to next field when this */
-					      /* Field is filled up 		*/
 	set_field_back(field[1], A_UNDERLINE); 
-	field_opts_off(field[1], O_AUTOSKIP);
+  field_opts_off(field[1], O_AUTOSKIP);
+  field_opts_off(field[2], O_BLANK | O_EDIT | O_ACTIVE);
+  field_opts_off(field[3], O_BLANK | O_EDIT | O_ACTIVE);
+
+  /* Fill LHS menu */
+  set_field_buffer(field[2], 0, "KEY?:");
+  set_field_buffer(field[3], 0, "PSK:");
 	
 	/* Create the form and post it */
 	FORM *my_form = new_form(field);
@@ -263,8 +304,6 @@ int main(int argc, char *argv[])
 	post_form(my_form);
 	wrefresh(my_form_win);
 
-	mvprintw(starty-17, startx-10, "KEY?:");
-	mvprintw(starty-14, startx-10, "PSK:");
 	mvprintw(LINES - 2, 0, "Use UP, DOWN arrow keys to switch between fields");
 	refresh();
 
@@ -290,15 +329,17 @@ int main(int argc, char *argv[])
       case '\b':
         form_driver(my_form, REQ_DEL_PREV);
         break;
+      // Delete the char under the cursor
+		  case KEY_DC:
+			  form_driver(my_form, REQ_DEL_CHAR);
+			  break;
       case 10:
         {
         char *key_needed = field_buffer(field[0], 0);
         if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
         {
           trim(key_needed);
-          if (strcmp(key_needed, "y") || strcmp(key_needed, "Y"))
-            break;
-          else if (strcmp(key_needed, "n") || strcmp(key_needed, "N"))
+          if (strcmp(key_needed, "y") || strcmp(key_needed, "Y") || strcmp(key_needed, "1"))
             break;
           else
             break;
