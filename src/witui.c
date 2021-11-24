@@ -225,9 +225,12 @@ int main(int argc, char *argv[])
   wrefresh(my_menu_win);
 
 
-  int c;
-	while(( c = getch()) != KEY_F(1))
-	{       switch(c)
+  int c = 0;
+  int exit_menu_flag = 0;
+	while(( c != KEY_F(1) ) && !exit_menu_flag)
+	{       
+    c = getch();
+    switch(c)
 	        {	
             case 106: 
             case KEY_DOWN:
@@ -244,7 +247,7 @@ int main(int argc, char *argv[])
 				      p = item_userptr(cur);
 				      p((char *)item_name(cur));
 				      pos_menu_cursor(my_menu);
-              clear();
+              exit_menu_flag = 1;
 				      break;
 			      }
 
@@ -253,13 +256,9 @@ int main(int argc, char *argv[])
           wrefresh(my_menu_win);
 
 	}	
-	unpost_menu(my_menu);
-	free_menu(my_menu);
-	for(int i = 0; i < ssid_count; ++i)
-		free_item(ssid_items[i]);
-	endwin();
+	
 
-
+  unpost_menu(my_menu);
   wrefresh(my_menu_win);
   /* Initialize the fields */
   FIELD *field[5];
@@ -286,7 +285,7 @@ int main(int argc, char *argv[])
 	FORM *my_form = new_form(field);
 	
 	/* Calculate the area required for the form */
-	int ch, rows, cols;
+	int ch = 0, rows, cols;
 	scale_form(my_form, &rows, &cols);
 
 	/* Create the window to be associated with the form */
@@ -310,8 +309,10 @@ int main(int argc, char *argv[])
   /* Clear fields */
 	/* Loop through to get user requests */
   int exit_form_flag=0;
-	while((ch = wgetch(my_form_win)) != KEY_F(1) || exit_form_flag == 1)
-	{	switch(ch)
+	while(ch != KEY_F(1) && !exit_form_flag)
+	{	
+    ch = wgetch(my_form_win);
+    switch(ch)
 		{	case KEY_DOWN:
 				/* Go to next field */
 				form_driver(my_form, REQ_NEXT_FIELD);
@@ -339,6 +340,7 @@ int main(int argc, char *argv[])
         if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
         {
           trim(key_needed);
+          exit_form_flag = 1;
           if (strcmp(key_needed, "y") || strcmp(key_needed, "Y") || strcmp(key_needed, "1"))
             break;
           else
@@ -346,7 +348,6 @@ int main(int argc, char *argv[])
           free(key_needed);
         }
         }
-        exit_form_flag = 1;
         break;
 			default:
 				/* If this is a normal character, it gets */
@@ -354,7 +355,7 @@ int main(int argc, char *argv[])
 				form_driver(my_form, ch);
 				break;
 		}
-	refresh();
+  refresh();
   wrefresh(my_form_win);
 
 	}
@@ -362,10 +363,55 @@ int main(int argc, char *argv[])
 	/* Un post form and free the memory */
 	unpost_form(my_form);
 	free_form(my_form);
-	free_field(field[0]);
-	free_field(field[1]); 
+  for (int i=0; i<5; i++)
+	  free_field(field[i]);
+  clear();
+  refresh();
+  wrefresh(my_form_win);
+  delwin(my_form_win);
 
+  post_menu(my_menu);
+	refresh();
+  wrefresh(my_menu_win);
+  exit_menu_flag = 0;
+  c = 0;
+while(( c != KEY_F(1) ) && !exit_menu_flag)
+	{       
+    c = getch();
+    switch(c)
+	        {	
+            case 106: 
+            case KEY_DOWN:
+				      menu_driver(my_menu, REQ_DOWN_ITEM);
+				      break;
+            case 107:
+			      case KEY_UP:
+			      	menu_driver(my_menu, REQ_UP_ITEM);
+			      	break;
+			      case 10: /* Enter */
+			      {	ITEM *cur;
+				      void (*p)(char *);
+				      cur = current_item(my_menu);
+				      p = item_userptr(cur);
+				      p((char *)item_name(cur));
+				      pos_menu_cursor(my_menu);
+              exit_menu_flag = 1;
+				      break;
+			      }
+
+			    break;
+		      }
+          wrefresh(my_menu_win);
+
+	}
+
+  /* free objects from ssid menu */
+	free_menu(my_menu);
+	for(int i = 0; i < ssid_count; ++i)
+		free_item(ssid_items[i]);
 	endwin();
+
+
   return 0;
 }
 
