@@ -129,134 +129,21 @@ for (int i = 0; i< strlen(string); i++ )
 return message_count;
 }
 
-static struct wpa_ctrl *ctrl_conn;
-static int hostapd_cli_quit = 0;
-static int hostapd_cli_attached = 0;
-static const char *ctrl_iface_dir = "/var/run/wpa_supplicant/wlp3s0";
-static char *ctrl_ifname = NULL;
-static int ping_interval = 5;
-void func(char *name);
 char selected_ssid[100];
-
-WINDOW *create_newwin(int height, int width, int starty, int startx);
-void destroy_win(WINDOW *local_win);
-
-static void
-trim(char *buffer)
-{
-    size_t n = strlen(buffer);
-    while (n-- && isspace(buffer[n]))
-	buffer[n] = 0;
+void func(char *name)
+{	move(20, 0);
+	clrtoeol();
+	//mvprintw(20, 0, "Item selected is : %s", name);
+  strcpy(selected_ssid, name);
 }
 
-int main(int argc, char *argv[])
+void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
 {
-  /* setup & scan wpa signals */
-  /* 
-  char message[2048];
-  ctrl_conn = wpa_ctrl_open(ctrl_iface_dir);
-    if (!ctrl_conn){
-        printf("Could not get ctrl interface!\n");
-        return -1;
-    }
-  printf("%d\n", wpa_cli_cmd_scan(ctrl_conn, message));
-  printf("%d\n", wpa_cli_cmd_scan_results(ctrl_conn, message));
-  wpa_ctrl_close(ctrl_conn);
-  */
-  /* end of wpa signals */
-
-  /* parse signal names */
-  /*
-  ssid wlist[SSID_NUM];
-  int ssid_count = ssid_str(message, wlist);
-  for (int i=0; i<ssid_count; i++)
-    printf("%s\n", wlist[i].name);
-    */
-
-  /* initialize curses menu */
-  ssid wlist[10];
-  int ssid_count = 10;
-  for(int i=0; i<ssid_count; i++)
-  {
-    char snum[10];
-    sprintf(snum, "Wifi-%d", i);
-    strcpy(wlist[i].name, snum );
-  }
-
-  initscr();
-	start_color();
-        cbreak();
-        noecho();
-	keypad(stdscr, TRUE);
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
-	init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
-  ITEM **ssid_items = (ITEM **)calloc(ssid_count + 1, sizeof(ITEM *));
-
-  for(int i = 0; i < ssid_count; ++i)
-	{       
-    ssid_items[i] = new_item(wlist[i].name, NULL);
-		/* Set the user pointer */
-		set_item_userptr(ssid_items[i], func);
-	}
-  ssid_items[ssid_count] = (ITEM *)NULL;
-
-  /* Locate menu */
+  /* Locate form */
   int height = 3;
 	int width = 10;
-	int starty = (LINES - height) / 2;	/* Calculating for a center placement */
+  int starty = (LINES - height) / 2;	/* Calculating for a center placement */
 	int startx = (COLS - width) / 2;	/* of the window		*/
-	/* Create menu */
-	MENU *my_menu = new_menu((ITEM **)ssid_items);
-
-  /* Create the window to be associated with the menu */
-  WINDOW *my_menu_win = newwin(100, 100, starty-20, startx);
-
-  /* Set main window and sub window */
-  set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 50, 50, 3, 1));
-  /* Post the menu */
-  attron(COLOR_PAIR(2));
-	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
-	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
-  attroff(COLOR_PAIR(2));
-	post_menu(my_menu);
-	refresh();
-  wrefresh(my_menu_win);
-
-
-  int c = 0;
-  int exit_menu_flag = 0;
-	while(( c != KEY_F(1) ) && !exit_menu_flag)
-	{       
-    c = getch();
-    switch(c)
-	        {	
-            case 106: 
-            case KEY_DOWN:
-				      menu_driver(my_menu, REQ_DOWN_ITEM);
-				      break;
-            case 107:
-			      case KEY_UP:
-			      	menu_driver(my_menu, REQ_UP_ITEM);
-			      	break;
-			      case 10: /* Enter */
-			      {	ITEM *cur;
-				      void (*p)(char *);
-				      cur = current_item(my_menu);
-				      p = item_userptr(cur);
-				      p((char *)item_name(cur));
-				      pos_menu_cursor(my_menu);
-              exit_menu_flag = 1;
-				      break;
-			      }
-
-			    break;
-		      }
-          wrefresh(my_menu_win);
-
-	}	
-	
 
   unpost_menu(my_menu);
   wrefresh(my_menu_win);
@@ -359,8 +246,7 @@ int main(int argc, char *argv[])
   wrefresh(my_form_win);
 
 	}
-
-	/* Un post form and free the memory */
+  /* Un post form and free the memory */
 	unpost_form(my_form);
 	free_form(my_form);
   for (int i=0; i<5; i++)
@@ -370,12 +256,53 @@ int main(int argc, char *argv[])
   wrefresh(my_form_win);
   delwin(my_form_win);
 
-  post_menu(my_menu);
+}
+
+static void make_ssid_menu(ssid *wlist, int ssid_count)
+{
+  start_color();
+        cbreak();
+        noecho();
+	keypad(stdscr, TRUE);
+	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+	init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
+  ITEM **ssid_items = (ITEM **)calloc(ssid_count + 1, sizeof(ITEM *));
+
+  for(int i = 0; i < ssid_count; ++i)
+	{       
+    ssid_items[i] = new_item(wlist[i].name, NULL);
+		/* Set the user pointer */
+		set_item_userptr(ssid_items[i], func);
+	}
+  ssid_items[ssid_count] = (ITEM *)NULL;
+
+  /* Locate menu */
+  int height = 3;
+	int width = 10;
+	int starty = (LINES - height) / 2;	/* Calculating for a center placement */
+	int startx = (COLS - width) / 2;	/* of the window		*/
+	/* Create menu */
+	MENU *my_menu = new_menu((ITEM **)ssid_items);
+
+  /* Create the window to be associated with the menu */
+  WINDOW *my_menu_win = newwin(100, 100, starty-20, startx);
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 50, 50, 3, 1));
+  /* Post the menu */
+  attron(COLOR_PAIR(2));
+	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
+	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
+  attroff(COLOR_PAIR(2));
+	post_menu(my_menu);
 	refresh();
   wrefresh(my_menu_win);
-  exit_menu_flag = 0;
-  c = 0;
-while(( c != KEY_F(1) ) && !exit_menu_flag)
+
+
+  int c = 0;
+	while( c != KEY_F(1) )
 	{       
     c = getch();
     switch(c)
@@ -395,7 +322,7 @@ while(( c != KEY_F(1) ) && !exit_menu_flag)
 				      p = item_userptr(cur);
 				      p((char *)item_name(cur));
 				      pos_menu_cursor(my_menu);
-              exit_menu_flag = 1;
+              make_psk_form(my_menu, my_menu_win);
 				      break;
 			      }
 
@@ -409,15 +336,68 @@ while(( c != KEY_F(1) ) && !exit_menu_flag)
 	free_menu(my_menu);
 	for(int i = 0; i < ssid_count; ++i)
 		free_item(ssid_items[i]);
+
+}
+
+static struct wpa_ctrl *ctrl_conn;
+static int hostapd_cli_quit = 0;
+static int hostapd_cli_attached = 0;
+static const char *ctrl_iface_dir = "/var/run/wpa_supplicant/wlp3s0";
+static char *ctrl_ifname = NULL;
+static int ping_interval = 5;
+
+WINDOW *create_newwin(int height, int width, int starty, int startx);
+void destroy_win(WINDOW *local_win);
+
+static void
+trim(char *buffer)
+{
+    size_t n = strlen(buffer);
+    while (n-- && isspace(buffer[n]))
+	buffer[n] = 0;
+}
+
+int main(int argc, char *argv[])
+{
+  /* setup & scan wpa signals */
+  /* 
+  char message[2048];
+  ctrl_conn = wpa_ctrl_open(ctrl_iface_dir);
+    if (!ctrl_conn){
+        printf("Could not get ctrl interface!\n");
+        return -1;
+    }
+  printf("%d\n", wpa_cli_cmd_scan(ctrl_conn, message));
+  printf("%d\n", wpa_cli_cmd_scan_results(ctrl_conn, message));
+  wpa_ctrl_close(ctrl_conn);
+  */
+  /* end of wpa signals */
+
+  /* parse signal names */
+  /*
+  ssid wlist[SSID_NUM];
+  int ssid_count = ssid_str(message, wlist);
+  for (int i=0; i<ssid_count; i++)
+    printf("%s\n", wlist[i].name);
+    */
+
+  /* initialize curses menu */
+  ssid wlist[10];
+  int ssid_count = 10;
+  for(int i=0; i<ssid_count; i++)
+  {
+    char snum[10];
+    sprintf(snum, "Wifi-%d", i);
+    strcpy(wlist[i].name, snum );
+  }
+
+  initscr();
+  make_ssid_menu(wlist, ssid_count);
+
 	endwin();
 
 
   return 0;
 }
 
-void func(char *name)
-{	move(20, 0);
-	clrtoeol();
-	//mvprintw(20, 0, "Item selected is : %s", name);
-  strcpy(selected_ssid, name);
-}
+
