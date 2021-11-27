@@ -137,6 +137,21 @@ void func(char *name)
   strcpy(selected_ssid, name);
 }
 
+static void
+trim(char *buffer)
+{
+    size_t n = strlen(buffer);
+    while (n-- && isspace(buffer[n]))
+	buffer[n] = 0;
+}
+
+static void print_menu_help()
+{
+attron(COLOR_PAIR(2));
+	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
+	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
+  attroff(COLOR_PAIR(2));
+}
 void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
 {
   /* Locate form */
@@ -256,7 +271,11 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
   wrefresh(my_form_win);
   delwin(my_form_win);
 
+  print_menu_help();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
 }
+
 
 static void make_ssid_menu(ssid *wlist, int ssid_count)
 {
@@ -292,11 +311,8 @@ static void make_ssid_menu(ssid *wlist, int ssid_count)
   set_menu_win(my_menu, my_menu_win);
   set_menu_sub(my_menu, derwin(my_menu_win, 50, 50, 3, 1));
   /* Post the menu */
-  attron(COLOR_PAIR(2));
-	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
-	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
-  attroff(COLOR_PAIR(2));
-	post_menu(my_menu);
+  print_menu_help();
+  post_menu(my_menu);
 	refresh();
   wrefresh(my_menu_win);
 
@@ -348,14 +364,6 @@ static int ping_interval = 5;
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
-
-static void
-trim(char *buffer)
-{
-    size_t n = strlen(buffer);
-    while (n-- && isspace(buffer[n]))
-	buffer[n] = 0;
-}
 
 int main(int argc, char *argv[])
 {
