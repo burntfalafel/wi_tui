@@ -129,6 +129,7 @@ for (int i = 0; i< strlen(string); i++ )
 return message_count;
 }
 
+/* global variable so will be set to NULL */
 char selected_ssid[100];
 void func(char *name)
 {	move(20, 0);
@@ -180,8 +181,12 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
   field_opts_off(field[3], O_BLANK | O_EDIT | O_ACTIVE);
 
   /* Fill LHS menu */
-  set_field_buffer(field[2], 0, "KEY?:");
+  set_field_buffer(field[2], 0, "SSID:");
   set_field_buffer(field[3], 0, "PSK:");
+
+  /* Fill RHS fields */
+  set_field_buffer(field[0], 0, selected_ssid);
+
 	
 	/* Create the form and post it */
 	FORM *my_form = new_form(field);
