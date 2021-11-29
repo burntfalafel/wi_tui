@@ -282,7 +282,7 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
 }
 
 
-static void make_ssid_menu(ssid *wlist, int ssid_count)
+static int make_ssid_menu(ssid *wlist, int ssid_count)
 {
   start_color();
         cbreak();
@@ -323,7 +323,9 @@ static void make_ssid_menu(ssid *wlist, int ssid_count)
 
 
   int c = 0;
-	while( c != KEY_F(1) )
+  int refresh_menu = 0;
+  int exit_menu_flag = 0;
+	while( (c != KEY_F(1)) && !exit_menu_flag)
 	{       
     c = getch();
     switch(c)
@@ -336,6 +338,10 @@ static void make_ssid_menu(ssid *wlist, int ssid_count)
 			      case KEY_UP:
 			      	menu_driver(my_menu, REQ_UP_ITEM);
 			      	break;
+            case KEY_F(5):
+              refresh_menu = 1;
+              exit_menu_flag = 1;
+              break;
 			      case 10: /* Enter */
 			      {	ITEM *cur;
 				      void (*p)(char *);
@@ -357,6 +363,10 @@ static void make_ssid_menu(ssid *wlist, int ssid_count)
 	free_menu(my_menu);
 	for(int i = 0; i < ssid_count; ++i)
 		free_item(ssid_items[i]);
+
+  if(refresh_menu)
+    return 1;
+  return 0;
 
 }
 
@@ -405,7 +415,10 @@ int main(int argc, char *argv[])
   }
 
   initscr();
-  make_ssid_menu(wlist, ssid_count);
+  while(make_ssid_menu(wlist, ssid_count))
+  {
+    strcpy(wlist[0].name,"TEST");
+  }
 
 	endwin();
 
