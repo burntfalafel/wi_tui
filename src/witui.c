@@ -56,9 +56,20 @@ static int wpa_cli_cmd_scan_results(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "SCAN_RESULTS", message);
 }
+static int wpa_cli_cmd_list_networks(struct wpa_ctrl *ctrl, char *message)
+{
+  return wpa_ctrl_command(ctrl, "LIST_NETWORKS", message);
+}
 static int wpa_cli_cmd_add_network(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "ADD_NETWORK", message);
+}
+static int wpa_cli_cmd_remove_network(struct wpa_ctrl *ctrl, char *message, char *network_id)
+{
+  char cmd[100];
+  sprintf(cmd, "REMOVE_NETWORK %s", network_id);
+
+  return wpa_ctrl_command(ctrl, cmd, message);
 }
 static int wpa_cli_cmd_set_ssid(struct wpa_ctrl *ctrl, char *message, char *network_id, char *ssid)
 {
@@ -91,6 +102,14 @@ static int wpa_cli_cmd_enable_network(struct wpa_ctrl *ctrl, char *message, char
 static int wpa_cli_cmd_save_config(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "SAVE_CONFIG", message);
+}
+static int wpa_cli_cmd_disconnect(struct wpa_ctrl *ctrl, char *message)
+{
+  return wpa_ctrl_command(ctrl, "DISCONNECT", message);
+}
+static int wpa_cli_cmd_reconnect(struct wpa_ctrl *ctrl, char *message)
+{
+  return wpa_ctrl_command(ctrl, "RECONNECT", message);
 }
 static int ssid_str(char* string, ssid *wlist )
 {
@@ -128,7 +147,26 @@ for (int i = 0; i< strlen(string); i++ )
 }
 return message_count;
 }
-
+static void get_network_id(char *ssid, char *list_networks, char *network_id)
+{
+  char snum[100];
+  sprintf(snum, "\t%s\tany", ssid);
+  char *strfound = strstr(list_networks, ssid);
+  if (strfound)
+  {
+    if((*(strfound-3) >= '0') && (*(strfound-3) <= '9'))
+    {
+      network_id[0] = *(strfound-3);
+      network_id[1] = *(strfound-2);
+      network_id[2] = '\0';
+    }
+    else
+    {
+      network_id[0] = *(strfound-2);
+      network_id[1] = '\0';
+    }
+  }
+}
 /* global variable so will be set to NULL */
 char selected_ssid[100];
 void func(char *name)
@@ -403,6 +441,11 @@ int main(int argc, char *argv[])
   for (int i=0; i<ssid_count; i++)
     printf("%s\n", wlist[i].name);
     */
+
+  char *FIND_SSID = "Halo2";
+char pp[3];
+char message[2048];
+get_network_id(FIND_SSID, message, pp);
 
   /* initialize curses menu */
   ssid wlist[10];
