@@ -30,7 +30,6 @@
 #include <menu.h>
 #include <form.h>
 
-
 #ifndef _WIN32_WCE
 #ifndef CONFIG_TI_COMPILER
 #include <signal.h>

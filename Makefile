@@ -1,16 +1,20 @@
 CC=clang
 LIB = lib/libwpa_client.a
-CFLAGS= -lform -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
-CCFLAGS=-Wall
-DEPS = include/includes.h include/wpa_ctrl.h include/common.h
-INCLUDEDIR = src/
-SRC = src/witui.c
+LDLIBS= -lform -lmenu -lncurses -lpthread -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
+CCFLAGS=-c -Wall
+INCLUDEDIR = include
+SRC_DIR := src
+SRC := $(wildcard $(SRC_DIR)/*.c)
 TARGET = witui
+OBJECTS = witui.o frontend.o util.o wpa_ctrl.o
 
 all: $(TARGET)
 
-$(TARGET): $(SRC) 
-	$(CC) $(CCFLAGS) -I$(INCLUDEDIR) $(SRC) $(LIB) -o $@ $(CFLAGS)
+$(TARGET): $(OBJECTS) 
+	$(CC) -o $@ $^ $(LDLIBS)
+
+%.o: $(SRC_DIR)/%.c 
+	$(CC) -I$(INCLUDEDIR) $(CCFLAGS) $< $(LIB) -o $@ $(LDLIBS)
 
 .PHONY: clean
 
