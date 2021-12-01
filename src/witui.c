@@ -6,7 +6,7 @@
 #include "wpa_ctrl.h"
 #include "witui.h"
 
-static struct wpa_ctrl *ctrl_conn;
+//static struct wpa_ctrl *ctrl_conn;
 static int hostapd_cli_quit = 0;
 static int hostapd_cli_attached = 0;
 static const char *ctrl_iface_dir = "/var/run/wpa_supplicant/wlp3s0";
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     printf("%s\n", wlist[i].name);
     */
 
-  char *FIND_SSID = "Halo2";
+char *FIND_SSID = "Halo2";
 char pp[3];
 char message[2048];
 get_network_id(FIND_SSID, message, pp);

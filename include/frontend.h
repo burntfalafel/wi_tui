@@ -1,23 +1,20 @@
-#ifndef FRONTEND_H
-#define FRONTEND_H
+#ifndef FRONTEND_H_
+#define FRONTEND_H_
 
 #include "includes.h"
 #include "witui.h"
 
-/* global variable so will be set to NULL */
-char selected_ssid[100];
+void func(char *name);
 
-static void func(char *name);
-
-static void trim(char *buffer);
+void trim(char *buffer);
 
 
-static void print_menu_help();
+void print_menu_help();
 
 
-static void make_psk_form(MENU *my_menu, WINDOW *my_menu_win);
+void make_psk_form(MENU *my_menu, WINDOW *my_menu_win);
 
 
-static int make_ssid_menu(ssid *wlist, int ssid_count);
+int make_ssid_menu(ssid *wlist, int ssid_count);
 
 #endif

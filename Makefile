@@ -6,15 +6,15 @@ INCLUDEDIR = include
 SRC_DIR := src
 SRC := $(wildcard $(SRC_DIR)/*.c)
 TARGET = witui
-OBJECTS = witui.o frontend.o util.o wpa_ctrl.o
+OBJECTS = $(SRC:$(SRC_DIR)/%.c=%.o)
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS) 
-	$(CC) -o $@ $^ $(LDLIBS)
+	$(CC) -o $@ $^ $(LIB) $(LDLIBS)
 
 %.o: $(SRC_DIR)/%.c 
-	$(CC) -I$(INCLUDEDIR) $(CCFLAGS) $< $(LIB) -o $@ $(LDLIBS)
+	$(CC) -I$(INCLUDEDIR) $(CCFLAGS) $<  -o $@ 
 
 .PHONY: clean
 

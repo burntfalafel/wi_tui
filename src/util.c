@@ -36,6 +36,7 @@ for (int i = 0; i< strlen(string); i++ )
 }
 return message_count;
 }
+
 void get_network_id(char *ssid, char *list_networks, char *network_id)
 {
   char snum[100];

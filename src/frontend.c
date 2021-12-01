@@ -1,13 +1,15 @@
 #include "frontend.h"
 
-static void func(char *name)
+char selected_ssid[SSID_CHAR_MAX];
+
+void func(char *name)
 {	move(20, 0);
 	clrtoeol();
 	//mvprintw(20, 0, "Item selected is : %s", name);
   strcpy(selected_ssid, name);
 }
 
-static void
+void
 trim(char *buffer)
 {
     size_t n = strlen(buffer);
@@ -15,14 +17,15 @@ trim(char *buffer)
 	buffer[n] = 0;
 }
 
-static void print_menu_help()
+void print_menu_help()
 {
 attron(COLOR_PAIR(2));
 	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
 	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
   attroff(COLOR_PAIR(2));
 }
-static void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
+
+void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
 {
   /* Locate form */
   int height = 3;
@@ -151,7 +154,7 @@ static void make_psk_form(MENU *my_menu, WINDOW *my_menu_win)
 }
 
 
-static int make_ssid_menu(ssid *wlist, int ssid_count)
+int make_ssid_menu(ssid *wlist, int ssid_count)
 {
   start_color();
         cbreak();

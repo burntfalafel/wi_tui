@@ -14,21 +14,21 @@
 #include "witui.h"
 
 static struct wpa_ctrl *ctrl_conn;
-static void wpa_cli_msg_cb(char *msg, size_t len);
-static int _wpa_ctrl_command(struct wpa_ctrl *ctrl, char *cmd, char *message);
-static int wpa_ctrl_command(struct wpa_ctrl *ctrl, char *cmd, char *message);
-static int wpa_cli_cmd_scan(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_scan_results(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_list_networks(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_add_network(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_remove_network(struct wpa_ctrl *ctrl, char *message, char *network_id);
-static int wpa_cli_cmd_set_ssid(struct wpa_ctrl *ctrl, char *message, char *network_id, char *ssid);
-static int wpa_cli_cmd_set_psk(struct wpa_ctrl *ctrl, char *message, char *network_id, char *psk);
-static int wpa_cli_cmd_no_psk(struct wpa_ctrl *ctrl, char *message, char *network_id);
-static int wpa_cli_cmd_enable_network(struct wpa_ctrl *ctrl, char *message, char *network_id);
-static int wpa_cli_cmd_save_config(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_disconnect(struct wpa_ctrl *ctrl, char *message);
-static int wpa_cli_cmd_reconnect(struct wpa_ctrl *ctrl, char *message);
+void wpa_cli_msg_cb(char *msg, size_t len);
+int _wpa_ctrl_command(struct wpa_ctrl *ctrl, char *cmd, char *message);
+int wpa_ctrl_command(struct wpa_ctrl *ctrl, char *cmd, char *message);
+int wpa_cli_cmd_scan(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_scan_results(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_list_networks(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_add_network(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_remove_network(struct wpa_ctrl *ctrl, char *message, char *network_id);
+int wpa_cli_cmd_set_ssid(struct wpa_ctrl *ctrl, char *message, char *network_id, char *ssid);
+int wpa_cli_cmd_set_psk(struct wpa_ctrl *ctrl, char *message, char *network_id, char *psk);
+int wpa_cli_cmd_no_psk(struct wpa_ctrl *ctrl, char *message, char *network_id);
+int wpa_cli_cmd_enable_network(struct wpa_ctrl *ctrl, char *message, char *network_id);
+int wpa_cli_cmd_save_config(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_disconnect(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_reconnect(struct wpa_ctrl *ctrl, char *message);
 
 #ifdef  __cplusplus
 extern "C" {
