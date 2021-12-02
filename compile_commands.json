@@ -1,19 +1,58 @@
 [
-    {
-        "arguments": [
-            "clang",
-            "-c",
-            "-Isrc/",
-            "lib/libwpa_client.a",
-            "-D",
-            "CONFIG_CTRL_IFACE",
-            "-D",
-            "CONFIG_CTRL_IFACE_UNIX",
-            "-o",
-            "witui",
-            "src/wpa_interface.c"
-        ],
-        "directory": "/home/void/workspace/witui",
-        "file": "src/wpa_interface.c"
-    }
+  {
+    "arguments": [
+      "/bin/clang",
+      "-Iinclude",
+      "-c",
+      "-Wall",
+      "-o",
+      "frontend.o",
+      "src/frontend.c"
+    ],
+    "directory": "/home/void/workspace/witui",
+    "file": "/home/void/workspace/witui/src/frontend.c",
+    "output": "/home/void/workspace/witui/frontend.o"
+  },
+  {
+    "arguments": [
+      "/bin/clang",
+      "-Iinclude",
+      "-c",
+      "-Wall",
+      "-o",
+      "util.o",
+      "src/util.c"
+    ],
+    "directory": "/home/void/workspace/witui",
+    "file": "/home/void/workspace/witui/src/util.c",
+    "output": "/home/void/workspace/witui/util.o"
+  },
+  {
+    "arguments": [
+      "/bin/clang",
+      "-Iinclude",
+      "-c",
+      "-Wall",
+      "-o",
+      "witui.o",
+      "src/witui.c"
+    ],
+    "directory": "/home/void/workspace/witui",
+    "file": "/home/void/workspace/witui/src/witui.c",
+    "output": "/home/void/workspace/witui/witui.o"
+  },
+  {
+    "arguments": [
+      "/bin/clang",
+      "-Iinclude",
+      "-c",
+      "-Wall",
+      "-o",
+      "wpa_ctrl.o",
+      "src/wpa_ctrl.c"
+    ],
+    "directory": "/home/void/workspace/witui",
+    "file": "/home/void/workspace/witui/src/wpa_ctrl.c",
+    "output": "/home/void/workspace/witui/wpa_ctrl.o"
+  }
 ]
