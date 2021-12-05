@@ -16,13 +16,13 @@ for (int i = 0; i< strlen(string); i++ )
         {
             if (string[j]==':')
             {
-                strncpy(wlist[message_count].name, string+i, j-i);
+                strncpy(wlist[message_count].name, string+i+1, j-i);
                 wlist[message_count].name[j-i-2] = '\0';
                 break;
             }
             else if (string[j]=='\0')
             {
-                strncpy(wlist[message_count].name, string+i, j-i);
+                strncpy(wlist[message_count].name, string+i+1, j-i);
                 wlist[message_count].name[j-i] = '\0';
             }
         }

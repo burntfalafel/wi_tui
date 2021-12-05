@@ -96,7 +96,7 @@ int wpa_cli_cmd_reconnect(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "RECONNECT", message);
 }
-int wpa_cli_comd_status(struct wpa_ctrl *ctrl, char *message)
+int wpa_cli_cmd_status(struct wpa_ctrl *ctrl, char *message)
 {
   return wpa_ctrl_command(ctrl, "STATUS", message);
 }

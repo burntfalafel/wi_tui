@@ -29,7 +29,7 @@ int wpa_cli_cmd_enable_network(struct wpa_ctrl *ctrl, char *message, char *netwo
 int wpa_cli_cmd_save_config(struct wpa_ctrl *ctrl, char *message);
 int wpa_cli_cmd_disconnect(struct wpa_ctrl *ctrl, char *message);
 int wpa_cli_cmd_reconnect(struct wpa_ctrl *ctrl, char *message);
-int wpa_cli_comd_status(struct wpa_ctrl *ctrl, char *message);
+int wpa_cli_cmd_status(struct wpa_ctrl *ctrl, char *message);
 
 #ifdef  __cplusplus
 extern "C" {
