@@ -41,19 +41,32 @@ void get_network_id(char *ssid, char *list_networks, char *network_id)
 {
   char snum[100];
   sprintf(snum, "\t%s\tany", ssid);
-  char *strfound = strstr(list_networks, ssid);
+  char *strfound = strstr(list_networks, snum);
   if (strfound)
   {
-    if((*(strfound-3) >= '0') && (*(strfound-3) <= '9'))
+    if((*(strfound-2) >= '0') && (*(strfound-2) <= '9'))
     {
-      network_id[0] = *(strfound-3);
-      network_id[1] = *(strfound-2);
+      network_id[0] = *(strfound-2);
+      network_id[1] = *(strfound-1);
       network_id[2] = '\0';
     }
     else
     {
-      network_id[0] = *(strfound-2);
+      network_id[0] = *(strfound-1);
       network_id[1] = '\0';
     }
   }
 }
+
+int get_network_status(char *message)
+{
+  char snum[30];
+  sprintf(snum, "COMPLETED");
+  char *strfound = strstr(message, snum);
+  if (strfound)
+  {
+    return 1;
+  }
+  return 0;
+}
+
