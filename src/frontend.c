@@ -7,29 +7,41 @@
 char selected_ssid[SSID_CHAR_MAX];
 
 void func(char *name)
-{	move(20, 0);
+{	
+  /* function callback to shared ssid name between menu and form */
+  move(20, 0);
 	clrtoeol();
 	//mvprintw(20, 0, "Item selected is : %s", name);
   strcpy(selected_ssid, name);
 }
 
-void
-trim(char *buffer)
+void trim(char *buffer)
 {
-    size_t n = strlen(buffer);
-    while (n-- && isspace(buffer[n]))
-	buffer[n] = 0;
+  /* get rid of any trailing spaces in PSK key entered */
+  size_t n = strlen(buffer);
+  while (n-- && isspace(buffer[n]))
+	  buffer[n] = 0;
 }
 
 void print_menu_help()
 {
-attron(COLOR_PAIR(2));
+  /* print common menu help entries used by menu and form */
+  attron(COLOR_PAIR(2));
 	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
 	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F1 to Exit)");
   attroff(COLOR_PAIR(2));
 }
 
-void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_conn)
+void print_ssid_help()
+{
+  attron(COLOR_PAIR(1));
+	mvprintw(LINES - 5, 0, "Press F5 to refresh");
+	mvprintw(LINES - 4, 0, "Press F2 to switch off/on Wifi device");
+  attroff(COLOR_PAIR(1));
+  print_menu_help();
+}
+
+void make_psk_form(MENU *ssid_menu, WINDOW *ssid_menu_win, struct wpa_ctrl *ctrl_conn)
 {
   /* Locate form */
   int height = 3;
@@ -37,11 +49,10 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
   int starty = (LINES - height) / 2;	/* Calculating for a center placement */
 	int startx = (COLS - width) / 2;	/* of the window		*/
 
-  unpost_menu(my_menu);
-  wrefresh(my_menu_win);
+  unpost_menu(ssid_menu);
+  wrefresh(ssid_menu_win);
   /* Initialize the fields */
   FIELD *field[5];
-  /* Initialize the fields */
   field[0] = new_field(1, 26, 1 , 10, 0, 0);
   field[1] = new_field(1, 26, 4, 10, 0, 0);
   field[2] = new_field(1, 5, starty-23, 3, 0, 0);
@@ -65,114 +76,118 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
 
 	
 	/* Create the form and post it */
-	FORM *my_form = new_form(field);
+	FORM *psk_form = new_form(field);
 	
 	/* Calculate the area required for the form */
 	int ch = 0, rows, cols;
-	scale_form(my_form, &rows, &cols);
+	scale_form(psk_form, &rows, &cols);
 
 	/* Create the window to be associated with the form */
-  WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
-  keypad(my_form_win, TRUE);
+  WINDOW *psk_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
+  keypad(psk_form_win, TRUE);
 
  	/* Set main window and sub window */
-  set_form_win(my_form, my_form_win);
-  set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+  set_form_win(psk_form, psk_form_win);
+  set_form_sub(psk_form, derwin(psk_form_win, rows, cols, 2, 2));
 
 	/* Print a border around the main window and print a title */
-  box(my_form_win, 0, 0);
-	//print_in_middle(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
+  box(psk_form_win, 0, 0);
 	
-	post_form(my_form);
-	wrefresh(my_form_win);
+	post_form(psk_form);
+	wrefresh(psk_form_win);
 
-	mvprintw(LINES - 2, 0, "Use UP, DOWN arrow keys to switch between fields");
+  attron(COLOR_PAIR(1));
+	mvprintw(LINES - 4, 0, "If no Wifi password, enter '0'/'n'/'N' in PSK: field");
+  attroff(COLOR_PAIR(1));
+  print_menu_help();
 	refresh();
 
-  /* remove any exsisting wpa connections */
+  /* create any local variables to be shared among wpa_ctrl method calls */
   char message_status[100];
   char network_id[100];
-    /* Clear fields */
+
 	/* Loop through to get user requests */
   int exit_form_flag=0;
 	while(ch != KEY_F(1) && !exit_form_flag)
 	{	
     if(ch == ERR)
       continue;
-    ch = wgetch(my_form_win);
+    ch = wgetch(psk_form_win);
     switch(ch)
 		{	case KEY_DOWN:
 				/* Go to next field */
-				form_driver(my_form, REQ_NEXT_FIELD);
+				form_driver(psk_form, REQ_NEXT_FIELD);
 				/* Go to the end of the present buffer */
 				/* Leaves nicely at the last character */
-				form_driver(my_form, REQ_END_LINE);
+				form_driver(psk_form, REQ_END_LINE);
 				break;
 			case KEY_UP:
 				/* Go to previous field */
-				form_driver(my_form, REQ_PREV_FIELD);
-				form_driver(my_form, REQ_END_LINE);
+				form_driver(psk_form, REQ_PREV_FIELD);
+				form_driver(psk_form, REQ_END_LINE);
 				break;
       case KEY_BACKSPACE:
       case 127:
       case '\b':
-        form_driver(my_form, REQ_DEL_PREV);
+       /* Backspace the char under the cursor */
+        form_driver(psk_form, REQ_DEL_PREV);
         break;
-      // Delete the char under the cursor
 		  case KEY_DC:
-			  form_driver(my_form, REQ_DEL_CHAR);
+       /* Delete the char under the cursor */
+			  form_driver(psk_form, REQ_DEL_CHAR);
 			  break;
       case 10:
-          form_driver(my_form, REQ_VALIDATION);
-          /* create a new wpa network */
-          wpa_cli_cmd_list_networks(ctrl_conn, message_status);
-          get_network_id(selected_ssid, message_status, network_id); 
-          if(strlen(network_id))
-            wpa_cli_cmd_remove_network(ctrl_conn, message_status, network_id);
-          wpa_cli_cmd_add_network(ctrl_conn, network_id);
-          wpa_cli_cmd_set_ssid(ctrl_conn, message_status, network_id, selected_ssid);
-          // assert message_status == "OK"
-          char *key_needed = field_buffer(field[1], 0);
-          if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
+        /* Enter */
+        form_driver(psk_form, REQ_VALIDATION);
+        /* remove any exsisting wpa connections */
+        wpa_cli_cmd_list_networks(ctrl_conn, message_status);
+        get_network_id(selected_ssid, message_status, network_id); 
+        if(strlen(network_id))
+          wpa_cli_cmd_remove_network(ctrl_conn, message_status, network_id);
+        /* create a new wpa network */
+        wpa_cli_cmd_add_network(ctrl_conn, network_id);
+        wpa_cli_cmd_set_ssid(ctrl_conn, message_status, network_id, selected_ssid);
+        // assert message_status == "OK"
+        char *key_needed = field_buffer(field[1], 0);
+        if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
+        {
+          trim(key_needed);
+          if (!strcmp(key_needed, "n") || !strcmp(key_needed, "N") || !strcmp(key_needed, "0"))
           {
-            trim(key_needed);
-            if (!strcmp(key_needed, "n") || !strcmp(key_needed, "N") || !strcmp(key_needed, "0"))
-            {
-              wpa_cli_cmd_no_psk(ctrl_conn, message_status, network_id);
-            }
-            else
-            {
-              wpa_cli_cmd_set_psk(ctrl_conn, message_status, network_id, key_needed);
-            }
-            free(key_needed);
-            wpa_cli_cmd_enable_network(ctrl_conn, message_status, network_id);
-            exit_form_flag = 1;
+            wpa_cli_cmd_no_psk(ctrl_conn, message_status, network_id);
           }
-          break;
+          else
+          {
+            wpa_cli_cmd_set_psk(ctrl_conn, message_status, network_id, key_needed);
+          }
+          free(key_needed);
+          wpa_cli_cmd_enable_network(ctrl_conn, message_status, network_id);
+          exit_form_flag = 1;
+        }
+        break;
 			default:
 				/* If this is a normal character, it gets */
 				/* Printed				  */	
-				form_driver(my_form, ch);
+				form_driver(psk_form, ch);
 				break;
 		}
   refresh();
-  wrefresh(my_form_win);
+  wrefresh(psk_form_win);
 
 	}
   /* Un post form and free the memory */
-	unpost_form(my_form);
-	free_form(my_form);
+	unpost_form(psk_form);
+	free_form(psk_form);
   for (int i=0; i<5; i++)
 	  free_field(field[i]);
   clear();
   refresh();
-  wrefresh(my_form_win);
-  delwin(my_form_win);
+  wrefresh(psk_form_win);
+  delwin(psk_form_win);
 
-	mvprintw(LINES - 4, 0, "If no Wifi password, enter '0'/'n'/'N' in PSK: field");
-  print_menu_help();
-  post_menu(my_menu);
-  wrefresh(my_menu_win);
+  print_ssid_help();
+  post_menu(ssid_menu);
+  wrefresh(ssid_menu_win);
 }
 
 
@@ -202,21 +217,19 @@ int make_ssid_menu(ssid *wlist, int ssid_count, struct wpa_ctrl *ctrl_conn)
 	int starty = (LINES - height) / 2;	/* Calculating for a center placement */
 	int startx = (COLS - width) / 2;	/* of the window		*/
 	/* Create menu */
-	MENU *my_menu = new_menu((ITEM **)ssid_items);
+	MENU *ssid_menu = new_menu((ITEM **)ssid_items);
 
   /* Create the window to be associated with the menu */
-  WINDOW *my_menu_win = newwin(100, 100, starty-20, startx);
+  WINDOW *ssid_menu_win = newwin(100, 100, starty-20, startx);
 
   /* Set main window and sub window */
-  set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 50, 50, 3, 1));
+  set_menu_win(ssid_menu, ssid_menu_win);
+  set_menu_sub(ssid_menu, derwin(ssid_menu_win, 50, 50, 3, 1));
   /* Post the menu */
-	mvprintw(LINES - 4, 0, "Press F5 to refresh");
-  print_menu_help();
-  post_menu(my_menu);
+  print_ssid_help();
+  post_menu(ssid_menu);
 	refresh();
-  wrefresh(my_menu_win);
-
+  wrefresh(ssid_menu_win);
 
   int c = 0;
   int refresh_menu = 0;
@@ -228,32 +241,35 @@ int make_ssid_menu(ssid *wlist, int ssid_count, struct wpa_ctrl *ctrl_conn)
 	        {	
             case 106: 
             case KEY_DOWN:
-				      menu_driver(my_menu, REQ_DOWN_ITEM);
+              /* go down */
+				      menu_driver(ssid_menu, REQ_DOWN_ITEM);
 				      break;
             case 107:
 			      case KEY_UP:
               /* go up */
-			      	menu_driver(my_menu, REQ_UP_ITEM);
+			      	menu_driver(ssid_menu, REQ_UP_ITEM);
 			      	break;
             case KEY_F(5):
               /* refresh */
               refresh_menu = 1;
               exit_menu_flag = 1;
               break;
-			      case 10: /* Enter */
+			      case 10: 
+              /* Enter */
 			      {	
               ITEM *cur;
 				      void (*p)(char *);
-				      cur = current_item(my_menu);
+				      cur = current_item(ssid_menu);
 				      p = item_userptr(cur);
 				      p((char *)item_name(cur));
-				      pos_menu_cursor(my_menu);
-              make_psk_form(my_menu, my_menu_win, ctrl_conn);
+				      pos_menu_cursor(ssid_menu);
+              make_psk_form(ssid_menu, ssid_menu_win, ctrl_conn);
               /* save progress to wpa */
               wpa_cli_cmd_save_config(ctrl_conn, message);
 				      break;
 			      }
             case KEY_F(2):
+            /* toggle connection */
               wpa_cli_cmd_status(ctrl_conn, message);
               if(get_network_status(message))
                 wpa_cli_cmd_disconnect(ctrl_conn, message);
@@ -264,17 +280,17 @@ int make_ssid_menu(ssid *wlist, int ssid_count, struct wpa_ctrl *ctrl_conn)
 
 			    break;
 		      }
-          wrefresh(my_menu_win);
+          wrefresh(ssid_menu_win);
 
 	}
 
   /* free objects from ssid menu */
-	free_menu(my_menu);
+	free_menu(ssid_menu);
 	for(int i = 0; i < ssid_count; ++i)
 		free_item(ssid_items[i]);
 
   if(refresh_menu)
-    return 1;
-  return 0;
+    return 1; /* refresh ssid menu */
+  return 0; /* exit ssid menu */
 
 }

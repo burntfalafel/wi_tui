@@ -549,7 +549,6 @@ void * __hide_aliasing_typecast(void *foo);
 #endif /* CONFIG_VALGRIND */
 
 /* ncurses */
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #define INTTOA(x) #x //used for converting int (only constants) to ascii 
 
 #endif /* COMMON_H */
