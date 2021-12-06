@@ -1,6 +1,8 @@
 #include "frontend.h"
 #include "wpa_ctrl.h"
 #include "util.h"
+#include <curses.h>
+#include <form.h>
 
 char selected_ssid[SSID_CHAR_MAX];
 
@@ -73,7 +75,7 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
   WINDOW *my_form_win = newwin(rows + 4, cols + 4, starty-20, startx-13);
   keypad(my_form_win, TRUE);
 
-	/* Set main window and sub window */
+ 	/* Set main window and sub window */
   set_form_win(my_form, my_form_win);
   set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
@@ -90,16 +92,13 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
   /* remove any exsisting wpa connections */
   char message_status[100];
   char network_id[100];
-  wpa_cli_cmd_list_networks(ctrl_conn, message_status);
-  get_network_id(selected_ssid, message_status, network_id); 
-  if(strlen(network_id))
-    wpa_cli_cmd_remove_network(ctrl_conn, message_status, network_id);
-
-  /* Clear fields */
+    /* Clear fields */
 	/* Loop through to get user requests */
   int exit_form_flag=0;
 	while(ch != KEY_F(1) && !exit_form_flag)
 	{	
+    if(ch == ERR)
+      continue;
     ch = wgetch(my_form_win);
     switch(ch)
 		{	case KEY_DOWN:
@@ -124,8 +123,12 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
 			  form_driver(my_form, REQ_DEL_CHAR);
 			  break;
       case 10:
-        {
+          form_driver(my_form, REQ_VALIDATION);
           /* create a new wpa network */
+          wpa_cli_cmd_list_networks(ctrl_conn, message_status);
+          get_network_id(selected_ssid, message_status, network_id); 
+          if(strlen(network_id))
+            wpa_cli_cmd_remove_network(ctrl_conn, message_status, network_id);
           wpa_cli_cmd_add_network(ctrl_conn, network_id);
           wpa_cli_cmd_set_ssid(ctrl_conn, message_status, network_id, selected_ssid);
           // assert message_status == "OK"
@@ -133,8 +136,7 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
           if (key_needed != 0 && (key_needed = strdup(key_needed)) != 0 )
           {
             trim(key_needed);
-            exit_form_flag = 1;
-            if (strcmp(key_needed, "n") || strcmp(key_needed, "N") || strcmp(key_needed, "0"))
+            if (!strcmp(key_needed, "n") || !strcmp(key_needed, "N") || !strcmp(key_needed, "0"))
             {
               wpa_cli_cmd_no_psk(ctrl_conn, message_status, network_id);
             }
@@ -143,11 +145,10 @@ void make_psk_form(MENU *my_menu, WINDOW *my_menu_win, struct wpa_ctrl *ctrl_con
               wpa_cli_cmd_set_psk(ctrl_conn, message_status, network_id, key_needed);
             }
             free(key_needed);
-            break;
+            wpa_cli_cmd_enable_network(ctrl_conn, message_status, network_id);
+            exit_form_flag = 1;
           }
-          wpa_cli_cmd_enable_network(ctrl_conn, message_status, network_id);
-        }
-        break;
+          break;
 			default:
 				/* If this is a normal character, it gets */
 				/* Printed				  */	
@@ -248,6 +249,8 @@ int make_ssid_menu(ssid *wlist, int ssid_count, struct wpa_ctrl *ctrl_conn)
 				      p((char *)item_name(cur));
 				      pos_menu_cursor(my_menu);
               make_psk_form(my_menu, my_menu_win, ctrl_conn);
+              /* save progress to wpa */
+              wpa_cli_cmd_save_config(ctrl_conn, message);
 				      break;
 			      }
             case KEY_F(2):
@@ -269,9 +272,6 @@ int make_ssid_menu(ssid *wlist, int ssid_count, struct wpa_ctrl *ctrl_conn)
 	free_menu(my_menu);
 	for(int i = 0; i < ssid_count; ++i)
 		free_item(ssid_items[i]);
-
-  /* save progress to wpa */
-  wpa_cli_cmd_save_config(ctrl_conn, message);
 
   if(refresh_menu)
     return 1;

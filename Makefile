@@ -14,7 +14,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(LIB) $(LDLIBS)
 
 %.o: $(SRC_DIR)/%.c 
-	$(CC) -I$(INCLUDEDIR) $(CCFLAGS) $<  -o $@ 
+	$(CC) -g -I$(INCLUDEDIR) $(CCFLAGS) $<  -o $@ 
 
 .PHONY: clean
 
