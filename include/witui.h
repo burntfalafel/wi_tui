@@ -9,12 +9,11 @@
 /* Path to wpa_supplcant conf file */
 #define WPA_SUPPLICANT_PATH "/etc/wpa_supplicant/wpa_supplicant.conf"
 
-typedef struct ssid
-{
+typedef struct ssid {
     char name[SSID_CHAR_MAX];
 } ssid;
 
 
-static const char *ctrl_iface_dir = "/var/run/wpa_supplicant/wlp3s0";
+static const char* ctrl_iface_dir = "/var/run/wpa_supplicant/wlp3s0";
 
 #endif
