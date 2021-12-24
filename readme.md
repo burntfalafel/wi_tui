@@ -1,5 +1,5 @@
 # Witui
-A simple tui to set your wifi. Minimal enough to be used in a embedded UNIX installation! 
+A simple tui to set your wifi. Minimal enough to be used in a minimal/embedded UNIX installation! 
 # Why any other wpa client sucks (for e.g. `wpa_tui`)?
 * Slow AF (takes a few seconds to do anything in them).
 * Open source ones use an init systemd as backend! 
