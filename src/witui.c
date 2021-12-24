@@ -10,7 +10,7 @@ int
 main(int argc, char* argv[]) {
     /* setup & scan wpa signals */
     char message[2048];
-    ctrl_conn = wpa_ctrl_open(ctrl_iface_dir);
+    ctrl_conn = wpa_ctrl_open(WPA_SUPPLICANT_PATH);
     if (!ctrl_conn) {
         printf("Could not get ctrl interface!\n");
         return -1;
