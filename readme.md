@@ -14,6 +14,7 @@ witui
 
 # Build Instructions
 
+Configure [`include/witui.h`](https://github.com/burntfalafel/witui/blob/master/include/witui.h) according to your wifi interface (for me was wlp3s0). The static library for `wpa_supplicant` has already been provided in this repo under `lib/`. Just now run;  
 ```
 make
 ```
